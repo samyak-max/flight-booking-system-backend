@@ -8,6 +8,7 @@ import { BookingModule } from './booking/booking.module';
 import { PassengerModule } from './passenger/passenger.module';
 import { TicketModule } from './ticket/ticket.module';
 import { UserModule } from './user/user.module';
+import { FlightStatusModule } from './flight-status/flight-status.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UserModule } from './user/user.module';
     PassengerModule,
     TicketModule,
     UserModule,
+    FlightStatusModule,
     ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [AppController],

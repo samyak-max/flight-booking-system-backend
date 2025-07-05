@@ -111,6 +111,7 @@ export class FlightService {
       duration: flight.duration,
       price: flight.price,
       availableSeats: flight.available_seats,
+      status: flight.status,
     };
   }
 }

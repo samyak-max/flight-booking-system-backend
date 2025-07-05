@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { FlightStatus } from '../../common/enums/flight-status.enum';
 
 export class Flight {
   @ApiProperty({
@@ -6,6 +7,13 @@ export class Flight {
     description: 'Unique flight number',
   })
   flightNumber: string;
+  
+  @ApiProperty({
+    enum: FlightStatus,
+    example: FlightStatus.SCHEDULED,
+    description: 'Current status of the flight',
+  })
+  status: FlightStatus;
 
   @ApiProperty({
     example: 'British Airways',

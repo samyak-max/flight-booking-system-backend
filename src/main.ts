@@ -2,9 +2,11 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   
   // Enable validation globally with better error messages
   app.useGlobalPipes(new ValidationPipe({
@@ -17,6 +19,9 @@ async function bootstrap() {
   // Enable CORS for frontend access
   app.enableCors();
   
+  // Serve static files from the public directory
+  app.useStaticAssets(join(__dirname, '..', 'public'));
+  
   // Configure Swagger
   const config = new DocumentBuilder()
     .setTitle('Flight Booking API')
@@ -27,6 +32,7 @@ async function bootstrap() {
     .addTag('bookings', 'Booking management')
     .addTag('tickets', 'Ticket operations')
     .addTag('users', 'User profile and preferences')
+    .addTag('flight-status', 'Real-time flight status updates')
     .addBearerAuth({
       type: 'http',
       scheme: 'bearer',
