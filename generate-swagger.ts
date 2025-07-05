@@ -1,23 +1,12 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AppModule } from './src/app.module';
+import * as fs from 'fs';
+import * as path from 'path';
 
-async function bootstrap() {
+async function generateSwaggerJson() {
   const app = await NestFactory.create(AppModule);
-  
-  // Enable validation globally with better error messages
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transformOptions: { enableImplicitConversion: true },
-  }));
-  
-  // Enable CORS for frontend access
-  app.enableCors();
-  
-  // Configure Swagger
+
   const config = new DocumentBuilder()
     .setTitle('Flight Booking API')
     .setDescription('API documentation for the Flight Booking System')
@@ -36,22 +25,20 @@ async function bootstrap() {
       in: 'header'
     })
     .build();
-  
+
   const document = SwaggerModule.createDocument(app, config, {
     deepScanRoutes: true,
     extraModels: [
-      // Add any additional models that might not be automatically discovered
+      // Include any classes that might not be automatically discovered
     ]
   });
   
-  SwaggerModule.setup('api', app, document, {
-    swaggerOptions: {
-      persistAuthorization: true,
-      tagsSorter: 'alpha',
-      operationsSorter: 'alpha',
-    }
-  });
-
-  await app.listen(process.env.PORT ?? 3000);
+  const outputPath = path.resolve(process.cwd(), 'swagger-spec.json');
+  fs.writeFileSync(outputPath, JSON.stringify(document, null, 2));
+  
+  console.log(`Swagger JSON file has been generated at: ${outputPath}`);
+  
+  await app.close();
 }
-bootstrap();
+
+generateSwaggerJson();
