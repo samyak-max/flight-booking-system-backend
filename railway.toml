@@ -2,16 +2,10 @@
 # Using Supabase for database (no additional PostgreSQL service needed)
 
 [build]
-  builder = "dockerfile"
 
 [deploy]
   startCommand = "node dist/src/main"
-  healthcheckPath = "/"
-  healthcheckTimeout = 300
-  restartPolicyType = "on-failure"
-  restartPolicyMaxRetries = 3
 
 [env]
   NODE_ENV = "production"
   PORT = "5000"
-  # Database provided by Supabase - no Railway PostgreSQL needed
