@@ -1,11 +1,5 @@
 # Railway Deployment Configuration
 # Using Supabase for database (no additional PostgreSQL service needed)
 
-[build]
-
 [deploy]
   startCommand = "node dist/src/main"
-
-[env]
-  NODE_ENV = "production"
-  PORT = "5000"
