@@ -30,6 +30,7 @@ export class FlightSearchDto {
     pattern: '^[A-Z]{3}$'
   })
   @IsString()
+  @Transform(({ value }) => typeof value === 'string' ? value.toUpperCase() : value)
   @Matches(/^[A-Z]{3}$/, { message: 'Origin must be a valid 3-letter IATA code' })
   origin: string;
 
@@ -42,6 +43,7 @@ export class FlightSearchDto {
     pattern: '^[A-Z]{3}$'
   })
   @IsString()
+  @Transform(({ value }) => typeof value === 'string' ? value.toUpperCase() : value)
   @Matches(/^[A-Z]{3}$/, { message: 'Destination must be a valid 3-letter IATA code' })
   destination: string;
 
@@ -73,14 +75,6 @@ export class FlightSearchDto {
   /**
    * Number of adults (1 to 9)
    */
-  @ApiProperty({
-    example: 2,
-    description: 'Number of adults (1 to 9)',
-    minimum: 1,
-    maximum: 9,
-    default: 1,
-    type: 'integer'
-  })
   @Transform(({ value }) => parseInt(value, 10))
   @IsInt()
   @Min(1)
@@ -90,14 +84,6 @@ export class FlightSearchDto {
   /**
    * Number of children (0 to 8)
    */
-  @ApiPropertyOptional({
-    example: 1,
-    description: 'Number of children aged 2-11 (0 to 8)',
-    minimum: 0,
-    maximum: 8,
-    default: 0,
-    type: 'integer'
-  })
   @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))
   @IsInt()
@@ -108,14 +94,6 @@ export class FlightSearchDto {
   /**
    * Number of infants (0 to 4)
    */
-  @ApiPropertyOptional({
-    example: 0,
-    description: 'Number of infants under 2 years (0 to 4)',
-    minimum: 0,
-    maximum: 4,
-    default: 0,
-    type: 'integer'
-  })
   @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))
   @IsInt()
@@ -134,6 +112,27 @@ export class FlightSearchDto {
     example: CabinClass.ECONOMY
   })
   @IsOptional()
+  @Transform(({ value }) => {
+    // Handle string values from query parameters
+    if (typeof value === 'string') {
+      // Try to match with CabinClass enum values
+      const normalized = value.toUpperCase();
+      
+      // Check if it matches any of the enum values directly
+      if (Object.values(CabinClass).includes(normalized as CabinClass)) {
+        return normalized;
+      }
+      
+      // Handle common variants
+      if (normalized === 'PREMIUM_ECONOMY' || normalized === 'PREMIUM-ECONOMY') {
+        return CabinClass.PREMIUM;
+      }
+      
+      // If not, use default
+      return CabinClass.ECONOMY;
+    }
+    return value || CabinClass.ECONOMY;
+  })
   @IsEnum(CabinClass, { message: 'Invalid cabin class' })
   class: CabinClass = CabinClass.ECONOMY;
 
@@ -148,6 +147,15 @@ export class FlightSearchDto {
     example: TripType.ROUND_TRIP
   })
   @IsOptional()
+  @Transform(({ value }) => {
+    // Handle string values from query parameters
+    if (typeof value === 'string') {
+      const normalized = value.toUpperCase();
+      const match = Object.values(TripType).find(v => v === normalized);
+      return match || TripType.ONE_WAY;
+    }
+    return value || TripType.ONE_WAY;
+  })
   @IsEnum(TripType, { message: 'Trip type must be ONE_WAY or ROUND_TRIP' })
   tripType: TripType = TripType.ONE_WAY;
 }

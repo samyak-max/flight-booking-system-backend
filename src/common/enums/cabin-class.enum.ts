@@ -2,5 +2,5 @@ export enum CabinClass {
   ECONOMY = 'ECONOMY',
   BUSINESS = 'BUSINESS',
   FIRST = 'FIRST',
-  PREMIUM = 'PREMIUM',
+  PREMIUM = 'PREMIUM_ECONOMY',
 }

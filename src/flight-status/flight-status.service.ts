@@ -24,7 +24,7 @@ export class FlightStatusService implements OnModuleInit {
         schema: 'public',
         table: 'flights',
       },
-      (payload) => {
+      async (payload) => {
         const updated = payload.new;
         const previous = payload.old;
 
@@ -37,12 +37,30 @@ export class FlightStatusService implements OnModuleInit {
         ) {
           this.logger.log(`Flight status change detected: ${JSON.stringify(updated)}`);
 
+          // Get complete flight information
+          const { data: flightData, error } = await this.supabase
+            .from('flights')
+            .select('id, flight_number, airline, origin_id, destination_id, departure_time, arrival_time, duration, status, status_updated_at')
+            .eq('id', updated.id)
+            .single();
+
+          if (error || !flightData) {
+            this.logger.error(`Error fetching complete flight data: ${error?.message}`);
+            return;
+          }
+
           this.flightStatusSubject.next({
-            flightId: updated.id,
-            flightNumber: updated.flight_number,
-            status: updated.status,
-            updatedAt: new Date().toISOString(),
-            message: this.getStatusMessage(updated.status, updated.flight_number),
+            flightId: flightData.id,
+            flightNumber: flightData.flight_number,
+            airline: flightData.airline,
+            originId: flightData.origin_id,
+            destinationId: flightData.destination_id,
+            departureTime: flightData.departure_time,
+            arrivalTime: flightData.arrival_time,
+            duration: flightData.duration,
+            status: flightData.status,
+            updatedAt: flightData.status_updated_at || new Date().toISOString(),
+            message: this.getStatusMessage(flightData.status, flightData.flight_number),
           });
         }
       }
@@ -60,8 +78,8 @@ export class FlightStatusService implements OnModuleInit {
         const data = JSON.stringify(update);
         return {
           data,
-          // Add proper SSE formatting for Postman and other clients
-          id: update.flightId,
+          // Use flight_number as the event ID
+          id: update.flightNumber,
           type: 'message',
         };
       })
@@ -69,31 +87,43 @@ export class FlightStatusService implements OnModuleInit {
   }
 
   // Get status updates for a specific flight
-  getStatusUpdatesForFlight(flightId: string): Observable<any> {
+  getStatusUpdatesForFlight(flightNumber: string): Observable<any> {
   return this.flightStatusSubject.asObservable().pipe(
-    // Filter to only updates for this flight
-    filter((update) => update.flightId === flightId),
+    // Filter to only updates for this flight by flight number
+    filter((update) => update.flightNumber === flightNumber),
 
     // Format the update as SSE-compliant object
     map((update) => ({
       data: JSON.stringify(update),
-      id: update.flightId,
+      id: update.flightNumber,
       type: 'message',
     }))
   );
 }
 
-  // Update a flight's status
+  // Update a flight's status by flight number instead of ID
   async updateFlightStatus(
-    flightId: string,
+    flightNumber: string,
     status: FlightStatus,
     additionalInfo?: string
   ): Promise<boolean> {
     try {
+      // First, verify the flight exists
+      const { data: flight, error: findError } = await this.supabase
+        .from('flights')
+        .select('id')
+        .eq('flight_number', flightNumber)
+        .single();
+
+      if (findError || !flight) {
+        this.logger.error(`Flight not found with number: ${flightNumber}`);
+        return false;
+      }
+
       const { error } = await this.supabase
         .from('flights')
         .update({ status, status_updated_at: new Date().toISOString() })
-        .eq('id', flightId);
+        .eq('flight_number', flightNumber);
 
       if (error) {
         this.logger.error(`Error updating flight status: ${error.message}`);
@@ -127,13 +157,13 @@ export class FlightStatusService implements OnModuleInit {
     }
   }
 
-  // Get the current status of a flight
-  async getCurrentFlightStatus(flightId: string): Promise<FlightStatusUpdateDto | null> {
+  // Get the current status of a flight by flight number
+  async getCurrentFlightStatus(flightNumber: string): Promise<FlightStatusUpdateDto | null> {
     try {
       const { data, error } = await this.supabase
         .from('flights')
-        .select('id, flight_number, status, status_updated_at')
-        .eq('id', flightId)
+        .select('id, flight_number, airline, origin_id, destination_id, departure_time, arrival_time, duration, status, status_updated_at')
+        .eq('flight_number', flightNumber)
         .single();
 
       if (error || !data) {
@@ -144,6 +174,12 @@ export class FlightStatusService implements OnModuleInit {
       return {
         flightId: data.id,
         flightNumber: data.flight_number,
+        airline: data.airline,
+        originId: data.origin_id,
+        destinationId: data.destination_id,
+        departureTime: data.departure_time,
+        arrivalTime: data.arrival_time,
+        duration: data.duration,
         status: data.status,
         updatedAt: data.status_updated_at,
         message: this.getStatusMessage(data.status, data.flight_number),

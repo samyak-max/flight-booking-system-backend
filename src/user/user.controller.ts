@@ -11,6 +11,34 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } 
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiOperation({ summary: 'Get dashboard summary data' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Dashboard summary data returned successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        user: { type: 'object' },
+        bookingStats: {
+          type: 'object',
+          properties: {
+            total: { type: 'number' },
+            confirmed: { type: 'number' },
+            cancelled: { type: 'number' },
+            pending: { type: 'number' }
+          }
+        },
+        recentBookings: { type: 'array' },
+        upcomingFlights: { type: 'array' }
+      }
+    }
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - authentication required' })
+  @Get('dashboard')
+  async getDashboardData(@Req() req) {
+    return this.userService.getDashboardData(req.user.id);
+  }
+
   @ApiOperation({ summary: 'Get user profile information' })
   @ApiResponse({ 
     status: 200, 

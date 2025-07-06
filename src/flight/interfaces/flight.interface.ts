@@ -3,6 +3,12 @@ import { FlightStatus } from '../../common/enums/flight-status.enum';
 
 export class Flight {
   @ApiProperty({
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: 'Unique flight identifier',
+  })
+  id: string;
+
+  @ApiProperty({
     example: 'BA123',
     description: 'Unique flight number',
   })
@@ -46,10 +52,10 @@ export class Flight {
   arrivalTime: string;
 
   @ApiProperty({
-    example: '8h 15m',
-    description: 'Flight duration in hours and minutes',
+    example: 495,
+    description: 'Flight duration in minutes',
   })
-  duration: string;
+  duration: number;
 
   @ApiProperty({
     example: 299.99,

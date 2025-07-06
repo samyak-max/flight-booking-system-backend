@@ -12,49 +12,49 @@ import { FlightStatus } from '../common/enums/flight-status.enum';
 export class FlightStatusController {
   constructor(private readonly flightStatusService: FlightStatusService) {}
 
-  @ApiOperation({ summary: 'Subscribe to all flight status updates' })
+  @ApiOperation({ summary: 'Subscribe to all flight status updates with complete flight details' })
   @ApiResponse({
     status: 200,
-    description: 'Server-sent events stream of flight status updates',
+    description: 'Server-sent events stream of flight status updates with complete flight details',
   })
   @Sse('updates')
   getStatusUpdates(): Observable<any> {
     return this.flightStatusService.getStatusUpdates();
   }
 
-  @ApiOperation({ summary: 'Subscribe to status updates for a specific flight' })
+  @ApiOperation({ summary: 'Subscribe to status updates for a specific flight with complete flight details' })
   @ApiParam({
-    name: 'flightId',
-    description: 'UUID of the flight to get status updates for',
-    example: '8a13a377-6131-47e5-8822-13f89e0dd898',
+    name: 'flightNumber',
+    description: 'Flight number to get status updates for',
+    example: 'BA123',
   })
   @ApiResponse({
     status: 200,
-    description: 'Server-sent events stream of status updates for the specified flight',
+    description: 'Server-sent events stream of status updates with complete flight details for the specified flight',
   })
-  @Sse('updates/:flightId')
-  getStatusUpdatesForFlight(@Param('flightId') flightId: string): Observable<any> {
-    return this.flightStatusService.getStatusUpdatesForFlight(flightId);
+  @Sse('updates/:flightNumber')
+  getStatusUpdatesForFlight(@Param('flightNumber') flightNumber: string): Observable<any> {
+    return this.flightStatusService.getStatusUpdatesForFlight(flightNumber);
   }
 
-  @ApiOperation({ summary: 'Get current status of a specific flight' })
+  @ApiOperation({ summary: 'Get current status of a specific flight with complete flight details' })
   @ApiParam({
-    name: 'flightId',
-    description: 'UUID of the flight to get current status for',
-    example: '8a13a377-6131-47e5-8822-13f89e0dd898',
+    name: 'flightNumber',
+    description: 'Flight number to get current status for',
+    example: 'BA123',
   })
   @ApiResponse({
     status: 200,
-    description: 'Current status of the flight',
+    description: 'Current status and complete flight details',
     type: FlightStatusUpdateDto,
   })
   @ApiResponse({
     status: 404,
     description: 'Flight not found',
   })
-  @Get(':flightId')
-  async getCurrentStatus(@Param('flightId') flightId: string): Promise<FlightStatusUpdateDto> {
-    const status = await this.flightStatusService.getCurrentFlightStatus(flightId);
+  @Get(':flightNumber')
+  async getCurrentStatus(@Param('flightNumber') flightNumber: string): Promise<FlightStatusUpdateDto> {
+    const status = await this.flightStatusService.getCurrentFlightStatus(flightNumber);
     if (!status) {
       throw new Error('Flight not found');
     }
@@ -64,9 +64,9 @@ export class FlightStatusController {
   @ApiOperation({ summary: 'Update the status of a flight (admin only)' })
   @ApiBearerAuth()
   @ApiParam({
-    name: 'flightId',
-    description: 'UUID of the flight to update',
-    example: '8a13a377-6131-47e5-8822-13f89e0dd898',
+    name: 'flightNumber',
+    description: 'Flight number to update',
+    example: 'BA123',
   })
   @ApiBody({ type: UpdateFlightStatusDto })
   @ApiResponse({
@@ -84,14 +84,14 @@ export class FlightStatusController {
     status: 401,
     description: 'Unauthorized - authentication required',
   })
-  @Post(':flightId/status')
+  @Post(':flightNumber/status')
   @UseGuards(JwtAuthGuard)
   async updateFlightStatus(
-    @Param('flightId') flightId: string,
+    @Param('flightNumber') flightNumber: string,
     @Body() updateDto: UpdateFlightStatusDto
   ): Promise<{ success: boolean; message: string }> {
     const success = await this.flightStatusService.updateFlightStatus(
-      flightId,
+      flightNumber,
       updateDto.status,
       updateDto.additionalInfo
     );
