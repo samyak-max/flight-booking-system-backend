@@ -40,4 +40,4 @@ COPY --from=development /usr/src/app/node_modules ./node_modules
 EXPOSE 5000
 
 # Start the server using production build
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]
