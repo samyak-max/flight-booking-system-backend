@@ -21,6 +21,7 @@
 - [Authentication & Security](#-authentication--security)
 - [Database Integration](#-database-integration)
 - [Real-time Features](#-real-time-features)
+- [Database Schema](#database-schema)
 
 ## 🚀 Introduction
 
@@ -764,34 +765,8 @@ sequenceDiagram
    - Receives updates for a specific flight
    - Useful for passenger tracking
    - Returns: Status changes for one flight
-## 💾 Database Integration
 
-### Supabase Architecture
-
-The application uses **Supabase** as its primary database and authentication provider, offering PostgreSQL with real-time capabilities.
-
-```mermaid
-graph TB
-    subgraph "Supabase Platform"
-        A[PostgreSQL Database] --> B[Row Level Security]
-        B --> C[Real-time Subscriptions]
-        C --> D[Authentication Service]
-        D --> E[API Gateway]
-    end
-    
-    subgraph "NestJS Application"
-        F[Supabase Service] --> G[Database Operations]
-        G --> H[Real-time Listeners]
-        H --> I[Authentication Integration]
-    end
-    
-    E --> F
-    A --> F
-    C --> H
-    D --> I
-```
-
-### Database Schema
+## 💾 Database Schema
 
 #### Core Tables
 
