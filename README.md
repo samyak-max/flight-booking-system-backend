@@ -14,6 +14,7 @@
 
 ## 📋 Table of Contents
 - [Introduction](#-introduction)
+- [Examples](#-examples)
 - [Installation & Setup](#-installation--setup)
 - [API Endpoints](#-api-endpoints)
 - [Data Models](#-data-models)
@@ -24,6 +25,33 @@
 ## 🚀 Introduction
 
 The Flight Booking Backend is a **production-ready**, **scalable** API built with **NestJS** that powers a complete flight booking platform. This system enables users to search for flights, manage bookings, process tickets, and handle user authentication with real-time flight status updates.
+
+## 👨‍🎓 Examples
+
+The flights table does not have many flights saved in it. Here are a few flights you can use to test:
+
+| origin_code | destination_code | departure_time         |
+| ----------- | ---------------- | ---------------------- |
+| CCU         | VTZ              | 2025-07-12 09:30:00+00 |
+| BHO         | TRV              | 2025-07-08 22:30:00+00 |
+| IXE         | IDR              | 2025-07-07 08:30:00+00 |
+| HYD         | BLR              | 2025-07-16 18:30:00+00 |
+| MAA         | VNS              | 2025-07-14 06:30:00+00 |
+| DEL         | JAI              | 2025-07-09 08:30:00+00 |
+| BHO         | JAI              | 2025-07-10 22:00:00+00 |
+| TRV         | GAU              | 2025-07-10 08:30:00+00 |
+| DEL         | BLR              | 2025-07-17 01:00:00+00 |
+| COK         | CCU              | 2025-07-11 09:30:00+00 |
+| BLR         | DEL              | 2025-07-08 19:30:00+00 |
+| BLR         | NAG              | 2025-07-17 11:00:00+00 |
+| IXC         | VTZ              | 2025-07-17 21:00:00+00 |
+| BOM         | MAA              | 2025-07-16 20:30:00+00 |
+| PNQ         | NAG              | 2025-07-10 12:30:00+00 |
+| HYD         | ATQ              | 2025-07-18 23:30:00+00 |
+| DEL         | BLR              | 2025-07-11 11:00:00+00 |
+| CCU         | VTZ              | 2025-07-19 20:00:00+00 |
+| IXB         | CCU              | 2025-07-08 21:00:00+00 |
+| COK         | GOI              | 2025-07-15 14:00:00+00 |
 
 ### 🌟 Key Features
 
@@ -843,3 +871,7 @@ erDiagram
     passengers ||--o{ tickets : "assigned"
 
 ```
+
+#### Schema on Supabase
+
+![supabase-schema-wuuejepxjpubqvzpwqaa](https://github.com/user-attachments/assets/cca27ec9-af6c-4b28-9f7a-aa33f59ad481)
