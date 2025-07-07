@@ -77,7 +77,7 @@ graph TB
         N --> Q[Real-time Subscriptions]
     end
     
-    subgraph "External Services"
+    subgraph "External Services (Future Scope)"
         R[Email Service] --> S[Booking Confirmations]
         T[Payment Gateway] --> U[Transaction Processing]
     end
@@ -167,6 +167,41 @@ graph TB
     A --> R
 ```
 
+### Real-time Architecture
+
+```mermaid
+graph TB
+    %% Real-time Layer
+    subgraph "Real-time Layer"
+        A[SSE Controller] 
+        B[Flight Status Service]
+        C[Database Change Subscription]
+        D[Event Emitters]
+    end
+
+    %% Client Connections
+    subgraph "Client Connections"
+        E[Frontend Client 1]
+        G[Frontend Client 2]
+        I[Frontend Client N]
+    end
+
+    %% Database Events
+    subgraph "Database Events"
+        K["Database Change: UPDATE"] --> L["Postgres Change Feed"]
+        L --> C
+    end
+
+    C --> D
+    D --> A
+    B --> C
+
+    A --> E
+    A --> G
+    A --> I
+
+```
+
 ### Data Flow Architecture
 
 ```mermaid
@@ -186,36 +221,6 @@ sequenceDiagram
     DB-->>API: Query Result
     API->>Cache: Store in Cache
     API-->>Client: HTTP Response
-```
-
-### Real-time Architecture
-
-```mermaid
-graph TB
-    subgraph "Real-time Layer"
-        A[SSE Controller] --> B[Flight Status Service]
-        B --> C[Database Listeners]
-        C --> D[Event Emitters]
-    end
-    
-    subgraph "Client Connections"
-        E[Frontend Client 1] --> F[SSE Stream 1]
-        G[Frontend Client 2] --> H[SSE Stream 2]
-        I[Frontend Client N] --> J[SSE Stream N]
-    end
-    
-    subgraph "Database Events"
-        K[Database Change] --> L[Trigger Event]
-        L --> M[Broadcast to Clients]
-    end
-    
-    F --> A
-    H --> A
-    J --> A
-    D --> M
-    M --> F
-    M --> H
-    M --> J
 ```
 
 ### Technology Stack
@@ -764,97 +769,77 @@ graph TB
 
 ```mermaid
 erDiagram
-    users {
-        uuid id PK
-        string email UK
-        string first_name
-        string last_name
-        jsonb preferences
-        timestamp created_at
-        timestamp updated_at
-    }
-    
     airports {
-        string code PK
+        uuid id PK
+        string code UK
         string name
         string city
         string country
         string timezone
-        float latitude
-        float longitude
     }
-    
+
     flights {
         uuid id PK
-        string flight_number UK
+        string flight_number
         string airline
-        string origin FK
-        string destination FK
+        uuid origin_id FK
+        uuid destination_id FK
         timestamp departure_time
         timestamp arrival_time
-        integer duration
-        decimal price
+        interval duration
+        numeric price
         jsonb available_seats
         string status
-        string aircraft_type
-        timestamp created_at
+        timestamp status_updated_at
     }
-    
+
     bookings {
         uuid id PK
         uuid user_id FK
         uuid flight_id FK
         uuid return_flight_id FK
         string booking_reference UK
-        decimal total_price
+        numeric total_price
         string cabin_class
-        integer passenger_count
+        jsonb passenger_count
         string status
         timestamp created_at
-        timestamp updated_at
     }
-    
+
     passengers {
         uuid id PK
         uuid booking_id FK
         string full_name
-        date date_of_birth
+        date dob
         string nationality
         string passport_number
-        string passenger_type
-        jsonb special_requests
-        timestamp created_at
+        string type
     }
-    
+
     tickets {
         uuid id PK
         uuid booking_id FK
         uuid passenger_id FK
-        string ticket_number UK
-        string seat_number
-        timestamp issued_at
-        timestamp expires_at
-        string status
+        string e_ticket_number UK
     }
-    
-    flight_status_history {
+
+    profiles {
         uuid id PK
-        uuid flight_id FK
-        string status
-        integer delay_minutes
-        string gate
-        string terminal
-        string reason
-        timestamp timestamp
-        uuid updated_by FK
+        jsonb preferences
     }
-    
-    users ||--o{ bookings : "makes"
+
+    auth_users {
+        uuid id PK
+    }
+
+    %% Relationships
+    auth_users ||--o{ bookings : "makes"
+    auth_users ||--|| profiles : "has"
     airports ||--o{ flights : "origin"
     airports ||--o{ flights : "destination"
-    flights ||--o{ bookings : "books"
-    bookings ||--o{ passengers : "includes"
+    flights ||--o{ bookings : "used in"
+    bookings ||--o{ passengers : "has"
     bookings ||--o{ tickets : "generates"
-    passengers ||--o{ tickets : "receives"
-    flights ||--o{ flight_status_history : "tracks"
+    passengers ||--o{ tickets : "assigned"
+
 ```
