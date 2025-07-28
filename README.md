@@ -98,6 +98,10 @@ graph TB
         G --> K[Ticket Service]
         G --> L[User Service]
         G --> M[Flight Status Service]
+        G --> V[Passenger Service]
+        
+        J --> K
+        J --> V
     end
     
     subgraph "Data Layer"
@@ -119,9 +123,11 @@ graph TB
     K --> N
     L --> N
     M --> N
+    V --> N
     
     J --> R
     J --> T
+
 ```
 
 ### Application Architecture
@@ -153,47 +159,6 @@ graph LR
     C --> D
     F --> G
     E --> J
-```
-
-### Module Architecture
-
-```mermaid
-graph TB
-    subgraph "Core Modules"
-        A[App Module] --> B[Auth Module]
-        A --> C[Flight Module]
-        A --> D[Booking Module]
-        A --> E[Ticket Module]
-        A --> F[User Module]
-        A --> G[Flight Status Module]
-        A --> H[Passenger Module]
-    end
-    
-    subgraph "Shared Modules"
-        I[Supabase Module] --> J[Database Service]
-        K[Common Module] --> L[Enums & DTOs]
-        M[Config Module] --> N[Environment Variables]
-    end
-    
-    subgraph "Infrastructure"
-        O[Guards] --> P[JWT Auth Guard]
-        O --> Q[Roles Guard]
-        R[Interceptors] --> S[Response Transformer]
-        R --> T[Logging Interceptor]
-    end
-    
-    B --> I
-    C --> I
-    D --> I
-    E --> I
-    F --> I
-    G --> I
-    H --> I
-    
-    A --> K
-    A --> M
-    A --> O
-    A --> R
 ```
 
 ### Real-time Architecture
